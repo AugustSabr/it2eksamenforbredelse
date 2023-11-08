@@ -33,7 +33,7 @@ class foodclass extends objectSuperclass {
 }
 
 let objList = []
-const player = new playerclass(25, 25, (canvas.width - 25) / 2, (canvas.height - 25) / 2, '#39FF14', 3, undefined, undefined, undefined)
+const player = new playerclass(25, 25, (canvas.width - 25) / 2, (canvas.height - 25) / 2, '#39FF14', 2, undefined, undefined, undefined)
 objList.push(player)
 
 //keyHandlers
@@ -98,36 +98,47 @@ function movePlayer() {
 let takenCoordinates = [];
 
 function createFood() {
-  let x, y;
+  const food = new foodclass(25, 25, 0, 0, '#FFFF00', true);
   do {
-    x = Math.floor(Math.random() * ctx.canvas.width / 25) * 25;
-    y = Math.floor(Math.random() * ctx.canvas.height / 25) * 25;
-  } while (isCoordinatesTaken(x, y));
+    food.xpos = Math.max(Math.random() * ctx.canvas.width - 25, 0);
+    food.ypos = Math.max(Math.random() * ctx.canvas.height - 25, 0);
+  } while (checkCollisions(food));
 
-  const food = new foodclass(25, 25, x, y, '#FFFF00', true);
   objList.push(food);
-  takenCoordinates.push([x, y]);
+  takenCoordinates.push([food.xpos, food.ypos]);
 }
 
-function isCoordinatesTaken(x, y) {
-  for (let i = 0; i < takenCoordinates.length; i++) {
-    if (x === takenCoordinates[i][0] && y === takenCoordinates[i][1]) {
-      console.log('wawaw');
-      return true; // Coordinates are taken
-    }
-  }
-  return false; // Coordinates are not taken
-}
 
 function makeWall(obj) {
   obj.color = '#808080';
   obj.eatable = false;
 }
 
+let eating = false;
+function checkCollisions(obj) {
+  for (let i = 1; i < objList.length; i++) {
+    if (
+      obj.xpos < objList[i].xpos + objList[i].width &&
+      obj.xpos + objList[i].width > objList[i].xpos &&
+      obj.ypos < objList[i].ypos + objList[i].height &&
+      obj.ypos + objList[i].height > objList[i].ypos
+    ) {
+      if (obj === player && objList[i].eatable === true) {
+        eating = true;
+      }
+      return true
+    } else if (eating){
+      makeWall(objList[i])
+      createFood();
+      eating = false;
+    }
+    return false
+  }
+}
+
 createFood()
 createFood()
 createFood()
-makeWall(objList[1])
 
 //draw
 function draw() {
@@ -137,6 +148,7 @@ function draw() {
     drawObject(objList[i])
   }
   movePlayer()
+  checkCollisions(player)
 }
 
 setInterval(draw, 10);
