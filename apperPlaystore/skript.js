@@ -1,47 +1,48 @@
 const dataJson = require('./googleplaystore.json');
 
-
+// Lager en 2d array med kategoritypene og anntal apper innenfor katogeriene som egne arrays
 function objKeysToObj(obj) {
-  let categories = [];
+  let simpleCategoriesArr = [];
   for (let i = 0; i < obj.length; i++) {
-    categories.push(obj[i].Category)
+    simpleCategoriesArr.push(obj[i].Category)
   }
-  categories.sort()
+  simpleCategoriesArr.sort()
 
-  let categoriesNumbered = {}
+  let complexCategoriesArr = []
   let caunt = 1;
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i] === categories[i+1]) {
+  for (let i = 0; i < simpleCategoriesArr.length; i++) {
+    if (simpleCategoriesArr[i] === simpleCategoriesArr[i+1]) {
       caunt++;
     } else {
-      categoriesNumbered[categories[i]] = caunt;
+      complexCategoriesArr.push([simpleCategoriesArr[i], caunt])
+
+      // categoriesObj[categoriesArr[i]] = caunt;
       caunt = 1
     }
   }
-  return categoriesNumbered
+  return complexCategoriesArr
 }
-let categoriesNumbered = objKeysToObj(dataJson)
+let categoriesCounted = objKeysToObj(dataJson)
 
-
-function findTopNKeysInObj(obj, n) {
+// kutter ned 2d arrayen til bare de n største
+function findTopNKeysInObj(arr, n) {
   // gjør objekt til 2d array
-  let entries = Object.entries(obj);
 
   // sorter array
-  entries.sort(function(a, b) {
+  arr.sort(function(a, b) {
     return b[1] - a[1];
   });
 
   // Fjern alle elementer bortsett fra de n første
-  if (entries.length > n) {
-    entries = entries.slice(0, n);
+  if (arr.length > n) {
+    arr = arr.slice(0, n);
   }
-  return entries
+  return arr
 }
 const n = 3
-const highestKeys = findTopNKeysInObj(categoriesNumbered, n)
+const highestKeys = findTopNKeysInObj(categoriesCounted, n)
 
-
+// finner gjennomsnittet av alle ratingene fra en valgfri ketagori
 function averageRating(obj, category) {
   let ratings = [];
   for (let i = 0; i < obj.length; i++) {
@@ -57,7 +58,7 @@ function averageRating(obj, category) {
   return sum / ratings.length;
 }
 
-
+// finner gjennomsnittet av alle installasjonene fra en valgfri ketagori
 function averageInstalls(obj, category) {
   let installs = [];
   for (let i = 0; i < obj.length; i++) {
@@ -79,8 +80,8 @@ function averageInstalls(obj, category) {
   return sum / installs.length;
 }
 
-
-function popularApp(obj, category) {
+// finner de n mest populære appene innenfor en kategori
+function popularApp(obj, category, n) {
   let categoryApps = {};
   for (let i = 0; i < obj.length; i++) {
     if (obj[i].Category === category) {
@@ -93,6 +94,7 @@ function popularApp(obj, category) {
   for (let i = 0; i < categoryApps.length; i++) {
     categoryApps[i][1] = categoryApps[i][1].replaceAll(",", "")
     categoryApps[i][1] = categoryApps[i][1].replaceAll("+", "")
+    categoryApps[i][1] = parseInt(categoryApps[i][1])
   }
 
   // sorter array
@@ -108,6 +110,7 @@ function popularApp(obj, category) {
 }
 
 
+//hviser de n mest populære kategoriene
 let mostPopularCategories = [];
 for (let i = 0; i < n; i++) {
   mostPopularCategories.push({ 'kategori': highestKeys[i][0], 'antall apper': highestKeys[i][1], 'gjennomsnittsrating': Math.round(averageRating(dataJson, highestKeys[i][0]) * 100) / 100, 'gjennomsnittlige antallet installasjoner': Math.round(averageInstalls(dataJson, highestKeys[i][0])) })
@@ -116,6 +119,7 @@ console.log();
 console.log("Mest populære kategorier:");
 console.table(mostPopularCategories);
 
+//hviser de n mest populære spillene av de n mest populære kategoriene
 let popularFAMILY = popularApp(dataJson, 'FAMILY')
 let popularGAME = popularApp(dataJson, 'GAME')
 let popularTOOLS = popularApp(dataJson, 'TOOLS')
