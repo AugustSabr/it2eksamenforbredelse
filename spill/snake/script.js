@@ -1,143 +1,191 @@
+// declaring variables
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-ctx.canvas.width = 600;
-ctx.canvas.height = 450;
+ctx.canvas.width = 600 //4*150
+ctx.canvas.height = 450 //3*150
 
-class Snake {
-  constructor() {
-    this.width = 15;
-    this.height = 15;
-    this.x = canvas.width / 2 - this.width / 2;
-    this.y = canvas.height / 2 - this.height / 2;
-    this.xSpeed = 0;
-    this.ySpeed = 0;
+class objectSuperclass {
+  constructor(width, height, xpos, ypos, color) {
+    this.width = width;
+    this.height = height;
+    this.xpos = xpos;
+    this.ypos = ypos;
+    this.color = color;
+  }
+}
+
+class playerclass extends objectSuperclass {
+  constructor(width, height, xpos, ypos, color, speed, xdirection, ydirection, lastDirection) {
+    super(width, height, xpos, ypos, color);
+    this.speed = speed;
+    this.xdirection = xdirection;
+    this.ydirection = ydirection;
+    this.lastDirection = lastDirection;
     this.tail = [];
-    this.tailLength = 3;
-    this.color = '#39FF14';
-    this.speed = 5; // Juster denne variabelen for å endre slangehastigheten
+    this.ateFood = false;
   }
+  move() {
+    this.ydirection = 0
+    this.xdirection = 0
+    switch (this.lastDirection) {
+      case 'up': this.ydirection = -1; break;
+      case 'down': this.ydirection = 1; break;
+      case 'right': this.xdirection = 1; break;
+      case 'left': this.xdirection = -1; break;
+    }
+  
+    if (
+      this.xpos < 0 ||
+      this.xpos + this.width > canvas.width ||
+      this.ypos < 0 ||
+      this.ypos + this.height > canvas.height
+    ) {startNewGame();}
+  
+    this.xpos = this.xpos + (this.speed * 25) * this.xdirection;
+    this.ypos = this.ypos + (this.speed * 25) * this.ydirection;
 
-  draw() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    for (let i = 0; i < this.tail.length; i++) {
-      ctx.fillRect(this.tail[i].x, this.tail[i].y, this.width, this.height);
-    }
-  }
+    this.tail.unshift({xpos: this.xpos, ypos: this.ypos});
 
-  update() {
-    for (let i = this.tail.length - 1; i > 0; i--) {
-      this.tail[i] = { ...this.tail[i - 1] };
+    if (!this.ateFood) {
+      this.tail.pop();
+    } else {
+      this.ateFood = false;
     }
-    if (this.tail.length > 0) {
-      this.tail[0] = { x: this.x, y: this.y };
-    }
-    this.x += this.xSpeed * this.speed;
-    this.y += this.ySpeed * this.speed;
-    if (this.x >= canvas.width) this.x = 0;
-    else if (this.x + this.width <= 0) this.x = canvas.width - this.width;
-    if (this.y >= canvas.height) this.y = 0;
-    else if (this.y + this.height <= 0) this.y = canvas.height - this.height;
-  }
-
-  changeDirection(direction) {
-    switch (direction) {
-      case 'ArrowUp':
-        if (this.ySpeed !== this.height) {
-          this.xSpeed = 0;
-          this.ySpeed = -1;
-        }
-        break;
-      case 'ArrowDown':
-        if (this.ySpeed !== -1) {
-          this.xSpeed = 0;
-          this.ySpeed = 1;
-        }
-        break;
-      case 'ArrowLeft':
-        if (this.xSpeed !== this.width) {
-          this.xSpeed = -1;
-          this.ySpeed = 0;
-        }
-        break;
-      case 'ArrowRight':
-        if (this.xSpeed !== -1) {
-          this.xSpeed = 1;
-          this.ySpeed = 0;
-        }
-        break;
-    }
-  }
-
-  eatFood(food) {
-    if (this.x === food.x && this.y === food.y) {
-      this.tail.push({});
-      while (this.tail.length > this.tailLength) {
-        this.tail.shift();
-      }
-      return true;
-    }
-    return false;
-  }
-
-  checkCollision() {
-    for (let i = 0; i < this.tail.length; i++) {
-      if (this.x === this.tail[i].x && this.y === this.tail[i].y) {
-        return true;
-      }
-    }
-    return false;
   }
 }
 
-class Food {
-  constructor() {
-    this.width = 15;
-    this.height = 15;
-    this.x = Math.floor(Math.random() * (canvas.width - this.width));
-    this.y = Math.floor(Math.random() * (canvas.height - this.height));
-    this.color = '#FFFF00';
-  }
-
-  draw() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+class foodclass extends objectSuperclass {
+  constructor(width, height, xpos, ypos, color, eatable) {
+    super(width, height, xpos, ypos, color);
+    this.eatable = eatable;
   }
 }
 
-const snake = new Snake();
-let food = new Food();
+let objList = []
+const player = new playerclass(25, 25, (canvas.width - 25) / 2, (canvas.height - 25) / 2, '#39FF14', undefined, undefined, undefined, undefined)
 
+//keyHandlers
+let upPressed = false;
+let downPressed = false;
+let leftPressed = false;
+let rightPressed = false;
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(e) {
+  switch (e.key) {
+    case "ArrowUp": upPressed = true; player.lastDirection = "up"; break;
+    case "ArrowDown": downPressed = true; player.lastDirection = "down"; break;
+    case "ArrowRight": rightPressed = true; player.lastDirection = "right"; break;
+    case "ArrowLeft": leftPressed = true; player.lastDirection = "left"; break;
+  }
+}
+
+function keyUpHandler(e) {
+  switch (e.key) {
+    case "ArrowUp": upPressed = false; break;
+    case "ArrowDown": downPressed = false; break;
+    case "ArrowRight": rightPressed = false; break;
+    case "ArrowLeft": leftPressed = false; break;
+  }
+}
+
+function drawObject(obj) {
+  ctx.beginPath();
+  ctx.rect(obj.xpos, obj.ypos, obj.width, obj.height);
+  ctx.fillStyle = obj.color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+let takenCoordinates = [];
+
+function createFood() {
+  const food = new foodclass(25, 25, 0, 0, '#FFFF00', true);
+  do {
+    food.xpos = Math.max(Math.random() * ctx.canvas.width - 25, 0);
+    food.ypos = Math.max(Math.random() * ctx.canvas.height - 25, 0);
+  } while (checkCollisions(food) || objOverlap(food, player));
+
+  objList.push(food);
+  takenCoordinates.push([food.xpos, food.ypos]);
+}
+
+let points = 0;
+function checkCollisions(obj) {
+  for (let i = 1; i < objList.length; i++) {
+    if (objOverlap(obj, objList[i])) {
+      if (obj === player) {
+        if (objList[i].eatable === true) {
+          player.ateFood = true;
+          points++;
+          // player.speed += 0.1 
+          objList.splice(i, 1);
+          createFood();
+        } else {
+          startNewGame()
+        }
+      }
+      return true
+    }
+  }
+}
+
+function objOverlap(obj1, obj2) {
+  return (
+    obj1.xpos < obj2.xpos + obj2.width &&
+    obj1.xpos + obj1.width > obj2.xpos &&
+    obj1.ypos < obj2.ypos + obj2.height &&
+    obj1.ypos + obj1.height > obj2.ypos
+  )
+}
+
+function startNewGame() {
+  player.speed = 1.0
+  player.tail = [];
+  objList = []
+  objList.push(player)
+
+  createFood()
+
+  player.xpos = (canvas.width - player.width) / 2;
+  player.ypos = (canvas.height - player.height) / 2;
+  player.lastDirection = undefined;
+  
+  points = 0;
+}
+startNewGame()
+
+
+//draw
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.draw();
-  food.draw();
+
+  for (let i = 0; i < objList.length; i++) {
+    drawObject(objList[i])
+
+    if (objList[i] === player) {
+      for (let j = 0; j < player.tail.length; j++) {
+        drawObject({
+          xpos: player.tail[j].xpos,
+          ypos: player.tail[j].ypos,
+          width: player.width,
+          height: player.height,
+          color: player.color
+        });
+      }
+    }
+  }
+  player.move()
+  checkCollisions(player)
+  drawPoints()
 }
 
-function update() {
-  snake.update();
-  if (snake.eatFood(food)) {
-    food = new Food();
-  }
-  if (snake.checkCollision()) {
-    alert('Game Over');
-    document.location.reload();
-  }
-  // Kollisjon med maten
-  if (snake.x === food.x && snake.y === food.y) {
-    food = new Food();
-  }
+function drawPoints() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("Points: " + points, 10, 20);
 }
-
-function gameLoop() {
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
-}
-
-document.addEventListener("keydown", (e) => {
-  snake.changeDirection(e.key);
-});
-
-gameLoop();
+setInterval(draw, 100);
