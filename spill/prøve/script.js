@@ -22,7 +22,9 @@ class playerClass extends objectSuperclass {
     this.xdirection = 0;
     this.ydirection = 0;
     this.points = 0;
+    this.inventory = [];
   }
+
   move() {
     //resets direction
     this.xdirection = 0;
@@ -60,8 +62,8 @@ class playerClass extends objectSuperclass {
   }    
 
   checkCollision() {
-    for (let i = 1; i < objList.length; i++) {
-      if (objOverlap(this, objList[i])) {
+    for (let i = 0; i < objList.length; i++) {
+      if (this !== objList[i] && objOverlap(this, objList[i])) {
         if (objList[i].constructor.name === "simpleEntitieClass") {
           if (objList[i].type === "obstacle") {
             switch (shortestDistance(this, objList[i])) {
@@ -71,15 +73,33 @@ class playerClass extends objectSuperclass {
               case DOWN: this.ypos = objList[i].ypos + objList[i].height; break;
             }
             continue;
-          } else if (objList[i].type === "coin") {
-            objList.splice(i, 1)
+          } else if (objList[i].type === "sheep" && this.xpos > canvas.width-85) {
+              if (player.inventory.length === 0) {
+                player.inventory.push(objList[i]);
+                objList.splice(i, 1);
+                player.speed = 1.5
+                continue;
+              } else {
+                alert("you die, by more than one sheep")
+                startNewGame()
+                break; //if the game is over, we do not need to keep
+              }
+          } else if (objList[i].type === "safeZone1" && player.inventory.length !== 0) {
+            player.inventory[0].xpos = player.xpos - 30;
+            player.inventory[0].ypos = player.ypos;
+            objList.push(player.inventory[0])
+            player.inventory.splice(0, 1);
+            player.speed = 2.0
             this.points++
-            createSimpleEntitie("coin", 20, 20, '#FFBF00')
+            createSimpleEntitie("sheep", 20, 20, undefined, undefined, '#FFFFFF')
+            createSimpleEntitie("obstacle", Math.random() * 50 + 50, Math.random() * 50 + 50, undefined, undefined, '#964B00')
+            createEnemy()
+            objList.sort(customSort);
             continue;
           }
         }
         if (objList[i].constructor.name === "enemyClass") {
-          alert("you die")
+          alert("you die, by ghost")
           startNewGame()
           break; //if the game is over, we do not need to keep
         }
@@ -92,8 +112,11 @@ class enemyClass extends objectSuperclass {
   constructor(width, height, xpos, ypos, color, speed) {
     super(width, height, xpos, ypos, color);
     this.speed = speed;
-    this.xdirection =  Math.random() < 0.5 ? -1 : 1;;
-    this.ydirection = Math.random() < 0.5 ? -1 : 1;;
+    this.xdirection =  Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+    this.ydirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+    let magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+    this.xdirection /= magnitude;
+    this.ydirection /= magnitude;
   }
   move() {
     this.xpos = this.xpos + this.speed * this.xdirection;
@@ -101,20 +124,55 @@ class enemyClass extends objectSuperclass {
     this.checkCollision()
 
     if (this.xpos < 0 || this.xpos + this.width > canvas.width) {
-      this.xdirection *= -1
+      this.xdirection *= -1;
+      this.ydirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random()
+
+      let magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+      this.xdirection /= magnitude;
+      this.ydirection /= magnitude;
     }
     if (this.ypos < 0 || this.ypos + this.height > canvas.height) {
-      this.ydirection *= -1
+      this.ydirection *= -1;
+      this.xdirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random()
+
+      let magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+      this.xdirection /= magnitude;
+      this.ydirection /= magnitude;
     }
   }
   checkCollision() {
-    for (let i = 1; i < objList.length; i++) {
-      if (objOverlap(this, objList[i]) && objList[i].constructor.name === "simpleEntitieClass" && objList[i].type === "safeZone") {
+    for (let i = 0; i < objList.length; i++) {
+      if (objOverlap(this, objList[i]) && objList[i].constructor.name === "simpleEntitieClass" && objList[i].type.includes("safeZone")) {
+        let magnitude;
         switch (shortestDistance(this, objList[i])) {
-          case LEFT: this.xdirection = -1; break;
-          case RIGHT: this.xdirection = 1; break;
-          case UP: this.ydirection = -1; break;
-          case DOWN: this.ydirection = 1; break;
+          case LEFT:
+            this.xdirection *= -1;
+            this.ydirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+            magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+            this.xdirection /= magnitude;
+            this.ydirection /= magnitude;
+            break;
+          case RIGHT:
+            this.xdirection *= -1;
+            this.ydirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+            magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+            this.xdirection /= magnitude;
+            this.ydirection /= magnitude;
+            break;
+          case UP:
+            this.ydirection *= -1;
+            this.xdirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+            magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+            this.xdirection /= magnitude;
+            this.ydirection /= magnitude;
+            break;
+          case DOWN:
+            this.ydirection *= -1;
+            this.xdirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random();
+            magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
+            this.xdirection /= magnitude;
+            this.ydirection /= magnitude;
+            break;
         }
         break;
       }
@@ -143,6 +201,7 @@ function resetPlayer() {
   player.xdirection = 0;
   player.ydirection = 0;
   player.points = 0;
+  player.inventory = [];
   objList.push(player)
 }
 
@@ -150,31 +209,42 @@ function createEnemy() {
   let width = 25;
   let height = 25;
   let speed = 2.0;
-  const enemy = new enemyClass(width, height, 0, 0, '#FFFFFF', speed);
+  const enemy = new enemyClass(width, height, 0, 0, '#D80000', speed);
 
-  unoccupiedSpace(enemy)
+  placeObjectInUnoccupiedSpace(enemy, [])
 
   objList.push(enemy);
 }
 
-function createSimpleEntitie(type, width, height, color) {
-  const simpleEntitie = new simpleEntitieClass(type, width, height, 0, 0, color);
+function createSimpleEntitie(type, width, height, xpos, ypos, color) {
+  const simpleEntitie = new simpleEntitieClass(type, width, height, xpos, ypos, color);
 
-  if (type !== "safeZone") {
-    unoccupiedSpace(simpleEntitie)
+  if (xpos === undefined || ypos === undefined) {
+    placeObjectInUnoccupiedSpace(simpleEntitie, [])
+
+    if (type === "sheep") {
+      for (let i = 0; i < objList.length; i++) {
+        if (objList[i].type === "safeZone2") {
+          while (simpleEntitie.xpos < objList[i].xpos) {
+            placeObjectInUnoccupiedSpace(simpleEntitie, [objList[i]])
+          }
+          break; //there is only one safeZone2
+        }        
+      }
+    }
   }
 
   objList.push(simpleEntitie);
 }
 
-function unoccupiedSpace(obj) {
+function placeObjectInUnoccupiedSpace(obj, list) {
   let isColliding;
   do {
     isColliding = false;
     obj.ypos = Math.max(Math.random() * ctx.canvas.height - obj.width, 0);
     obj.xpos = Math.max(Math.random() * ctx.canvas.width - obj.height, 0);
     for (let i = 0; i < objList.length; i++) {
-      if (objOverlap(obj, objList[i])) {
+      if (objOverlap(obj, objList[i]) && !list.includes(objList[i])) {
         isColliding = true;
         break;
       }
@@ -200,6 +270,29 @@ function shortestDistance(obj1, obj2) {
     }
   }
 }
+
+function customSort(a, b) {
+  const classOrder = {
+    "simpleEntitieClass": 0,
+    "enemyClass": 1,
+    "playerClass": 2
+  };
+  const typeOrder = {
+    "safeZone1": 0,
+    "safeZone2": 1,
+    "obstacle": 2,
+    "sheep": 3
+  };
+
+  if (a.constructor.name !== b.constructor.name) {
+    return classOrder[a.constructor.name] - classOrder[b.constructor.name];
+  }
+  if (a.constructor.name === "simpleEntitieClass") {
+    return typeOrder[a.type] - typeOrder[b.type];
+  }
+  return 0;
+}
+
 //handle inputs
 const keysPressed = {};
 document.addEventListener("keydown", function(event) {keysPressed[event.key] = true;});
@@ -228,12 +321,14 @@ function drawObject(obj) {
 function startNewGame() {
   objList = []
   resetPlayer()
-  createSimpleEntitie("safeZone", 85, canvas.height, '#1E90FF')
-  for (let i = 0; i < 2; i++) {
-    createSimpleEntitie("obstacle", 100, 100, '#555555')
+  createSimpleEntitie("safeZone1", 85, canvas.height, 0, 0, '#2C6D08')
+  createSimpleEntitie("safeZone2", 85, canvas.height, canvas.width-85, 0, '#2C6D08')
+  for (let i = 0; i < 3; i++) {
+    createSimpleEntitie("obstacle", Math.random() * 50 + 50, Math.random() * 50 + 50, undefined, undefined, '#964B00')
+    createSimpleEntitie("sheep", 20, 20, undefined, undefined, '#FFFFFF')
   }
-  createSimpleEntitie("coin", 20, 20, '#FFBF00')
   createEnemy()
+  objList.sort(customSort);
 }
 startNewGame()
 
@@ -241,24 +336,22 @@ startNewGame()
 function gameloop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  player.move();
-
-  // Draw the safe zone first
+  // Draw background objects
   for (let i = 0; i < objList.length; i++) {
-    if (objList[i].type === "safeZone") {
+    if (objList[i].constructor.name === "simpleEntitieClass" && (objList[i].type.includes("safeZone") || objList[i].type === "obstacle")) {
       drawObject(objList[i]);
-      break; // only one safe zone
     }
   }
 
   for (let i = 0; i < objList.length; i++) {
-    if (objList[i].type !== "safeZone") {
+    if (!(objList[i].constructor.name === "simpleEntitieClass" && (objList[i].type.includes("safeZone") || objList[i].type === "obstacle"))) {
       drawObject(objList[i]);
       if (objList[i].constructor.name === "enemyClass") {
         objList[i].move()
       }
     }
   }
+  player.move();
   drawPoints()
 }
 setInterval(gameloop, 10);

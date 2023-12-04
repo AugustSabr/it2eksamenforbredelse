@@ -245,14 +245,13 @@ function gameloop() {
 
   // Draw the safe zone first
   for (let i = 0; i < objList.length; i++) {
-    if (objList[i].type === "safeZone") {
+    if (objList[i].type === "safeZone" || objList[i].type === "obstacle") {
       drawObject(objList[i]);
-      break; // only one safe zone
     }
   }
 
   for (let i = 0; i < objList.length; i++) {
-    if (objList[i].type !== "safeZone") {
+    if (objList[i].type !== "safeZone" && objList[i].type !== "obstacle") {
       drawObject(objList[i]);
       if (objList[i].constructor.name === "enemyClass") {
         objList[i].move()
