@@ -126,7 +126,6 @@ class enemyClass extends objectSuperclass {
     if (this.xpos < 0 || this.xpos + this.width > canvas.width) {
       this.xdirection *= -1;
       this.ydirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random()
-
       let magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
       this.xdirection /= magnitude;
       this.ydirection /= magnitude;
@@ -134,7 +133,6 @@ class enemyClass extends objectSuperclass {
     if (this.ypos < 0 || this.ypos + this.height > canvas.height) {
       this.ydirection *= -1;
       this.xdirection = Math.random() < 0.5 ? Math.random()*-1 : Math.random()
-
       let magnitude = Math.sqrt(this.xdirection ** 2 + this.ydirection ** 2);
       this.xdirection /= magnitude;
       this.ydirection /= magnitude;
@@ -336,19 +334,11 @@ startNewGame()
 function gameloop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw background objects
+  // Draw
   for (let i = 0; i < objList.length; i++) {
-    if (objList[i].constructor.name === "simpleEntitieClass" && (objList[i].type.includes("safeZone") || objList[i].type === "obstacle")) {
-      drawObject(objList[i]);
-    }
-  }
-
-  for (let i = 0; i < objList.length; i++) {
-    if (!(objList[i].constructor.name === "simpleEntitieClass" && (objList[i].type.includes("safeZone") || objList[i].type === "obstacle"))) {
-      drawObject(objList[i]);
-      if (objList[i].constructor.name === "enemyClass") {
-        objList[i].move()
-      }
+    drawObject(objList[i]);
+    if (objList[i].constructor.name === "enemyClass") {
+      objList[i].move()
     }
   }
   player.move();
