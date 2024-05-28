@@ -7,7 +7,17 @@
     <title>Document</title>
 </head>
 <body>
-  <canvas id="myCanvas"></canvas>  <!-- width og height bestemmer kordinatsystemet inni html elementet (ikke det samme som css) -->
+  <canvas id="myCanvas"></canvas>
+  <div id="start-screen">
+    <h1>Welcome to the Game!</h1>
+    <button id="start-button">Start Game</button>
+  </div>
+  <div id="death-screen">
+    <h1>Game Over</h1>
+    <p>Your high Score: <span id="highScore"></span></p>
+    <p>Your Score: <span id="score"></span></p>
+    <button id="restart-button">Restart</button>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
