@@ -75,6 +75,7 @@ class playerClass extends objectSuperclass {
             objList.splice(i, 1)
             this.points++
             createSimpleEntitie("coin", 20, 20, '#FFBF00')
+            createSimpleEntitie("obstacle", 100, 100, '#555555')
             continue;
           }
         }
@@ -157,10 +158,17 @@ function createEnemy() {
   objList.push(enemy);
 }
 
-function createSimpleEntitie(type, width, height, color) {
+function createSimpleEntitie(type, width, height, color, xpos, ypos) {
   const simpleEntitie = new simpleEntitieClass(type, width, height, 0, 0, color);
 
-  if (type !== "safeZone") {
+  if (type == "obstacle") {
+    simpleEntitie.width = Math.random() * 50;
+    simpleEntitie.height = Math.random() * 50;
+  }
+  if (type == "safeZone") {
+    simpleEntitie.xpos = xpos;
+    simpleEntitie.ypos = ypos;
+  } else {
     unoccupiedSpace(simpleEntitie)
   }
 
@@ -228,12 +236,15 @@ function drawObject(obj) {
 function startNewGame() {
   objList = []
   resetPlayer()
-  createSimpleEntitie("safeZone", 85, canvas.height, '#1E90FF')
-  for (let i = 0; i < 2; i++) {
-    createSimpleEntitie("obstacle", 100, 100, '#555555')
+  createSimpleEntitie("safeZone", 85, canvas.height, '#1E90FF', 0, 0)
+  createSimpleEntitie("safeZone", 85, canvas.height, '#1E90FF', 600-85, 0)
+
+  for (let i = 0; i < 3; i++) {
+    createEnemy()
   }
+  createSimpleEntitie("obstacle", 100, 100, '#555555')
+
   createSimpleEntitie("coin", 20, 20, '#FFBF00')
-  createEnemy()
 }
 startNewGame()
 
