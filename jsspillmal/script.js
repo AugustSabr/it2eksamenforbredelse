@@ -49,7 +49,8 @@ function hideDeathScreen() {
 
 // Event listener for start- and restartbutton
 document.getElementById("start-button").addEventListener("click", startNewGame);
-document.getElementById("restart-button").addEventListener("click", startNewGame);
+document.getElementById("retry-button").addEventListener("click", startNewGame);
+document.getElementById("reset-button").addEventListener("click", function() {localStorage.removeItem("highScore"); document.getElementById("highScore").textContent = 0});
 
 // Base class for game objects
 class objectSuperClass {
