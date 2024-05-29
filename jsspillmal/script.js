@@ -316,6 +316,8 @@ function gameloop(timestamp) {
     // Draw player last so it appaer on top
     drawObject(player);
     drawPoints();
+
+    // RequestAnimationFrame makes smooth animations and optimal performance, it synchronizing with the browser's paint cycles to avoid stuttering
     requestAnimationFrame(gameloop);
   } else {
     requestAnimationFrame(gameloop);
