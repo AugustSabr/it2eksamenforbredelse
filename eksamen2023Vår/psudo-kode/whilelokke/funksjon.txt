@@ -3,8 +3,11 @@ FUNCTION trekanttall (n)
   RETURN tn
 ENDFUNCTION
 
+SET sum TO 0
 SET i TO 1
 WHILE i IS LESS THAN OR EQUAL TO 10:
-  trekanttall(i)
+  SET sum TO sum + trekanttall(i)
   INCREMENT i
 ENDWHILE
+
+DISPLAY sum
