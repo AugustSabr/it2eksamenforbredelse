@@ -37,6 +37,26 @@ function filterActivitiesByCategory(obj, category) {
 }
 
 /**
+ * Function to filter out sub activities
+ * @param {*} obj Object containing activity data
+ * @returns An array of the main categories (not including sub-activities)
+ */
+function filterOutSubActivities(obj) {
+  const newCategoryArr = [];
+  for (let i = 0; i < obj.length; i++) {
+    if (!obj[i]['alle aktiviteter'].startsWith("�")) {
+      const newObject = {
+        'alle aktiviteter': obj[i]['alle aktiviteter'],
+        'kjønn': obj[i]['kjønn'],
+        'Tidsbruk 2000 I alt': obj[i]['Tidsbruk 2000 I alt']
+      };
+      newCategoryArr.push(newObject);
+    }
+  }
+  return newCategoryArr;
+}
+
+/**
  * Function to find the fastest gender for each activity
  * @param {*} arr Array of activity objects
  * @returns An object containing the fastest gender and time for each activity
@@ -71,7 +91,28 @@ function findActivitiesWithLowerTimeByGender(arr) {
 }
 
 /**
- * Function to calculate the difference in time between two floats. note that the larger float needs to be float1
+ * Function to find the activity with the maximum time saved. This function can be genger spesific or general
+ * @param {*} object Object containing activities and their corresponding time saved
+ * @returns Object representing the activity with the maximum time saved
+ */
+function findMaxTimeSavedByGender(object, gender = null) {
+  let maxTimeSaved = -Infinity;
+  let maxTimeSavedObject = null;
+
+  for (let key in object) {
+    if (object.hasOwnProperty(key) && (gender === null || object[key]['Raskeste kjønn'] === gender)) {
+      if (object[key]['tid spart (time.min)'] > maxTimeSaved) {
+        maxTimeSaved = object[key]['tid spart (time.min)'];
+        maxTimeSavedObject = object[key];
+      }
+    }
+  }
+
+  return maxTimeSavedObject;
+}
+
+/**
+ * Function to calculate the difference in time between two floats. Note that the larger float needs to be float1, but the function is only called when that is allready established
  * @param {*} float1 The first and bigger float number
  * @param {*} float2 The second and smaller float number
  * @returns The difference in time between float1 and float2
@@ -101,7 +142,6 @@ function separateFloat(floatNum) {
   const parts = floatStr.split('.');
   const leftPart = parseInt(parts[0], 10);
   let rightPart = parts.length > 1 ? parts[1] : '0';
-  console.log(rightPart);
   rightPart = rightPart.padEnd(2, '0').substring(0, 2); // Ensure rightPart has two digits
 
   return {
@@ -110,16 +150,12 @@ function separateFloat(floatNum) {
   };
 }
 
-// Function to remove prefix characters from a string
-// Parameters:
-// - str: Input string
-// Returns: The input string with the prefix characters removed
 /**
  * Function to remove � prefix, its meant as an indent to show sub activities
  * @param {*} str Input string
  * @returns The input string with the prefix characters removed
  */
-function removeStarPrefix(str) {
+function removeIndentPrefix(str) {
   if (str.startsWith("� ")) {
     return str.substring(2);
   }
@@ -134,7 +170,7 @@ function displayObjAsTable(obj) {
   let tableArr = [];
   for (let key in obj) {
     let newObj = { // Create a new object with new formatting better for display
-      'Aktivitet': removeStarPrefix(key),
+      'Aktivitet': removeIndentPrefix(key),
       ...obj[key] // Copy other key-value pairs from the input object
     };
 
@@ -158,3 +194,6 @@ function displayObjAsTable(obj) {
 // console.log(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt')));
 // displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt')));
 // displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt')));
+// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)));
+// console.log(findMaxTimeSaved(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
+console.log(findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt'))));
