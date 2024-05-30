@@ -102,12 +102,13 @@ function findMaxTimeSavedByGender(object, gender = null) {
   for (let key in object) {
     if (object.hasOwnProperty(key) && (gender === null || object[key]['Raskeste kjønn'] === gender)) {
       if (object[key]['tid spart (time.min)'] > maxTimeSaved) {
-        maxTimeSaved = object[key]['tid spart (time.min)'];
-        maxTimeSavedObject = object[key];
+        maxTimeSavedObject = { // Create a new object with new formatting better for display
+          'Aktivitet': removeIndentPrefix(key),
+          ...object[key] // Copy other key-value pairs from the input object
+        };
       }
     }
   }
-
   return maxTimeSavedObject;
 }
 
@@ -195,5 +196,10 @@ function displayObjAsTable(obj) {
 // displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt')));
 // displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt')));
 // displayObjAsTable(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)));
-// console.log(findMaxTimeSaved(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
-console.log(findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt'))));
+// console.log(findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
+
+// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)), "Menn").Aktivitet)));
+// displayObjAsTable(findActivitiesWithLowerTimeByGender(dataJson));
+
+// console.log((findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
+
