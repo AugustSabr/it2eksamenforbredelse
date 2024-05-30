@@ -167,7 +167,7 @@ function removeIndentPrefix(str) {
  * Function to display an object as a table
  * @param {*} obj Object to display as a table
  */
-function displayObjAsTable(obj) {
+function readyObjForDsiplayAsTable(obj) {
   let tableArr = [];
   for (let key in obj) {
     let newObj = { // Create a new object with new formatting better for display
@@ -178,28 +178,28 @@ function displayObjAsTable(obj) {
     // Separate the time 'tid (time.min)' into hours and minutes
     const timeSeparatedFloat = separateFloat(newObj['tid (time.min)']);
     newObj['tid (time)'] = timeSeparatedFloat.left;
-    newObj['tid (min)'] = timeSeparatedFloat.right;
+    newObj['tid (min)'] = parseInt(timeSeparatedFloat.right, 10);
     delete newObj['tid (time.min)'];
     
     // Separate the time 'tid spart (time.min)' into hours and minutes
     const savedTimeSeparatedFloat = separateFloat(newObj['tid spart (time.min)']);
     newObj['tid spart (time)'] = savedTimeSeparatedFloat.left;
-    newObj['tid spart (min)'] = savedTimeSeparatedFloat.right;
+    newObj['tid spart (min)'] = parseInt(savedTimeSeparatedFloat.right, 10);
     delete newObj['tid spart (time.min)'];
 
     tableArr.push(newObj);
-  }  
-  console.table(tableArr);
+  }
+  return tableArr;
 }
 
 // console.log(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt')));
-// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt')));
-// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt')));
-// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)));
+// console.table(readyObjForDsiplayAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Husholdsarbeid i alt'))));
+// console.table(readyObjForDsiplayAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, 'Fritid i alt'))));
+// console.table(readyObjForDsiplayAsTable(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
 // console.log(findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
 
-// displayObjAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)), "Menn").Aktivitet)));
-// displayObjAsTable(findActivitiesWithLowerTimeByGender(dataJson));
+// console.table(readyObjForDsiplayAsTable(findActivitiesWithLowerTimeByGender(filterActivitiesByCategory(dataJson, findMaxTimeSavedByGender(findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson)), "Menn").Aktivitet))));
+console.log(readyObjForDsiplayAsTable(findActivitiesWithLowerTimeByGender(dataJson)));
 
 // console.log((findActivitiesWithLowerTimeByGender(filterOutSubActivities(dataJson))));
-
+// console.log(filterOutSubActivities(dataJson));
